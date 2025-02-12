@@ -120,3 +120,49 @@ Detailed results, including training and testing performance, comparisons with o
 See the paper for in-depth analysis and comparisons.
 
 ## File Structure
+
+repository-directory/
+├── src/
+│ ├── mnist/
+│ │ └── train.py
+│ ├── cifar10/
+│ │ └── train.py
+│ ├── activation_functions.py
+│ └── utils.py
+├── tests/
+│ ├── mnist/
+│ │ └── mnist_TAAF_model.pth (Example checkpoint)
+│ └── cifar10/
+│ │ └── cifar10_TAAF_model.pth (Example checkpoint)
+├── LICENSE
+└── README.md
+
+## Citation
+
+If you use this code or the TAAF activation function in your research, please cite the following paper:
+
+Bryn T. Chatfield. (2025). The Analog Activation Function (TAAF) of Emergent Linear Systems: Evaluating the Performance of The Analog Activation Function (TAAF) on MNIST and CIFAR-10 Datasets. OpenASCI & Genova Laboratories Research & Development Div.
+
+Replace `(2025)` with the actual year of publication or pre-print and update the citation format as needed based on where your paper is hosted.
+
+## License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+For questions or issues related to this repository or the TAAF activation function, please contact:
+
+Bryn T. Chatfield
+[Your Email Address or Contact Method]
+OpenASCI & Genova Laboratories
+
+---
+
+**Note:**
+
+*   **Replace placeholders:**  Make sure to replace the bracketed placeholders (e.g., `[repository-url]`, `[repository-directory]`, `link-to-your-paper-here`, `[Your Email Address or Contact Method]`) with the actual information.
+*   **License:** Choose an appropriate license (e.g., MIT License is common for research code) and include a `LICENSE` file in your repository.
+*   **requirements.txt:** If you haven't already, consider creating a `requirements.txt` file to list all Python package dependencies to make it easier for others to set up their environment. You can generate this using `pip freeze > requirements.txt` in your environment.
+*   **Paper Link:**  If your paper is available online (e.g., ArXiv, your website), definitely link to it in the README to make it easily accessible.
+*   **Adapt and Expand:**  This is a template, feel free to adapt and expand it with any additional information relevant to your repository or your specific needs. For example, if you have instructions for using GPUs, or details about specific experimental parameters, you can add those to the "Getting Started" or "Model and Training Details" sections.
