@@ -128,22 +128,6 @@ Detailed results are in the paper.
 *   **MNIST:** ~99.39%
 *   **CIFAR-10:** ~79.37%
 
-## File Structure
-repository-directory/
-├── src/
-│ ├── mnist/
-│ │ └── train.py
-│ ├── cifar10/
-│ │ └── train.py
-├── tests/
-│ ├── mnist/
-│ │ └── mnist_TAAF_model.pth
-│ └── cifar10/
-│   └── cifar10_TAAF_model.pth
-├── LICENSE
-├── README.md
-└── requirements.txt
-
 ## Citation
 Bryn T. Chatfield. (2025). The Analog Activation Function (TAAF) of Emergent Linear Systems: Evaluating the Performance of The Analog Activation Function (TAAF) on MNIST and CIFAR-10 Datasets. OpenASCI & Genova Laboratories Research & Development Div.
 
