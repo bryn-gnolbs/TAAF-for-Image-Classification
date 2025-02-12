@@ -132,7 +132,7 @@ Detailed results are in the paper.
 Bryn T. Chatfield. (2025). The Analog Activation Function (TAAF) of Emergent Linear Systems: Evaluating the Performance of The Analog Activation Function (TAAF) on MNIST and CIFAR-10 Datasets. OpenASCI & Genova Laboratories Research & Development Div.
 
 ## License
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file.
+This project is licensed under the **A customised version of the Hippocratic License v3** - see the [LICENSE](LICENSE) file.
 
 ## Contact
 Bryn T. Chatfield
