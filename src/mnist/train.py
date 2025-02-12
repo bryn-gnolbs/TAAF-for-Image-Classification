@@ -1,3 +1,14 @@
+# --------------------------------------------------------------------------------------------------
+# This code is released under the terms of the Hippocratic License 3.0.
+#
+# Hippocratic License 3.0: Modified for Bryn T. Chatfield & TAAF Project
+# Version 3.0, Modified February 14, 2025
+# Full license text available in the LICENSE file in this repository and at:
+# https://opensourcemodels.com/licenses/hippocratic-license-3.0-modified-taaf.txt
+#
+# Copyright (c) 2025, Bryn T. Chatfield
+# --------------------------------------------------------------------------------------------------
+
 import torch  # noqa: N999
 from torch import nn, optim
 from torch.utils.data import DataLoader
@@ -197,6 +208,6 @@ for epoch in range(num_epochs):
     )  # Updated print statement
 
 # Save the model checkpoint (filename now includes activation type)
-model_filename = f"mnist_{model_name_suffix}_model.pth"
+model_filename = f"./tests/mnist/mnist_{model_name_suffix}_model.pth"
 torch.save(model.state_dict(), model_filename)
 print(f"Model saved to {model_filename}")

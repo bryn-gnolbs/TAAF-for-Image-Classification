@@ -128,8 +128,6 @@ repository-directory/
 │ │ └── train.py
 │ ├── cifar10/
 │ │ └── train.py
-│ ├── activation_functions.py
-│ └── utils.py
 ├── tests/
 │ ├── mnist/
 │ │ └── mnist_TAAF_model.pth (Example checkpoint)
