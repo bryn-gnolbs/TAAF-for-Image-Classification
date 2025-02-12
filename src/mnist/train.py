@@ -143,8 +143,13 @@ def train(model, train_loader, criterion, optimizer, device):
         correct += predicted.eq(labels).sum().item()
 
     train_loss = running_loss / len(train_loader)
-    train_acc = 100.0 * correct / total
-    return train_loss, train_acc
+    top1_train_accuracy = 100.0 * correct / total  # Renamed to top1_train_accuracy
+    percentage_train_error = 100.0 - top1_train_accuracy  # Calculate Percentage error
+    return (
+        train_loss,
+        top1_train_accuracy,
+        percentage_train_error,
+    )  # Return percentage_train_error
 
 
 # Testing loop (same as before)
@@ -165,8 +170,9 @@ def test(model, test_loader, criterion, device):
             correct += predicted.eq(labels).sum().item()
 
     test_loss = running_loss / len(test_loader)
-    test_acc = 100.0 * correct / total
-    return test_loss, test_acc
+    top1_accuracy = 100.0 * correct / total  # Renamed to top1_accuracy
+    percentage_error = 100.0 - top1_accuracy  # Calculate Percentage error
+    return test_loss, top1_accuracy, percentage_error  # Return percentage_error
 
 
 # Train and evaluate the model (same as before with model name change)
@@ -177,10 +183,18 @@ if activation_type == "ELU":
 
 for epoch in range(num_epochs):
     print(f"Epoch {epoch + 1}/{num_epochs} - Activation: {activation_type}")
-    train_loss, train_acc = train(model, train_loader, criterion, optimizer, device)
-    test_loss, test_acc = test(model, test_loader, criterion, device)
-    print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}%")
-    print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_acc:.2f}%")
+    train_loss, top1_train_accuracy, percentage_train_error = train(
+        model, train_loader, criterion, optimizer, device
+    )  # Get percentage_train_error
+    test_loss, top1_accuracy, percentage_error = test(
+        model, test_loader, criterion, device
+    )  # Get percentage_error
+    print(
+        f"Train Loss: {train_loss:.4f}, Train Top-1 Accuracy: {top1_train_accuracy:.2f}%, Train Percentage Error: {percentage_train_error:.2f}%"
+    )  # Updated print statement
+    print(
+        f"Test Loss: {test_loss:.4f}, Test Top-1 Accuracy: {top1_accuracy:.2f}%, Test Percentage Error: {percentage_error:.2f}%"
+    )  # Updated print statement
 
 # Save the model checkpoint (filename now includes activation type)
 model_filename = f"mnist_{model_name_suffix}_model.pth"
