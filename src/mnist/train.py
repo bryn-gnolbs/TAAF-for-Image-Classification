@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from tqdm import tqdm
 import torch.nn.functional as F  # Import for functional tanh
+from torch.optim.lr_scheduler import ExponentialLR  # Import for LR Decay
 
 
 # Define The Analog Activation Function (TAAF)
@@ -113,8 +114,12 @@ test_dataset = datasets.MNIST(
     root="./data", train=False, download=True, transform=transform
 )
 
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+train_loader = DataLoader(
+    train_dataset, batch_size=120, shuffle=True
+)  # Updated batch_size to 120
+test_loader = DataLoader(
+    test_dataset, batch_size=120, shuffle=False
+)  # Updated batch_size to 120
 
 # Initialize model, loss function, and optimizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -131,7 +136,10 @@ model = MNISTModel(
     activation_type=activation_type, elu_alpha=elu_alpha, elu_beta=elu_beta
 ).to(device)
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.AdamW(model.parameters(), lr=0.001)  # Updated Optimizer to AdamW
+
+# Learning Rate Scheduler - Exponential Decay
+lr_scheduler = ExponentialLR(optimizer, gamma=0.98)  # Decay rate of 0.98 per epoch
 
 
 # Training loop (same as before)
@@ -187,7 +195,7 @@ def test(model, test_loader, criterion, device):
 
 
 # Train and evaluate the model (same as before with model name change)
-num_epochs = 10
+num_epochs = 300  # Updated num_epochs to 300
 model_name_suffix = activation_type
 if activation_type == "ELU":
     model_name_suffix += f"_alpha{elu_alpha}_beta{elu_beta}"
@@ -207,7 +215,9 @@ for epoch in range(num_epochs):
         f"Test Loss: {test_loss:.4f}, Test Top-1 Accuracy: {top1_accuracy:.2f}%, Test Percentage Error: {percentage_error:.2f}%"
     )  # Updated print statement
 
+    lr_scheduler.step()  # Step the learning rate scheduler every epoch
+
 # Save the model checkpoint (filename now includes activation type)
-model_filename = f"./tests/mnist/mnist_{model_name_suffix}_model.pth"
+model_filename = f"./tests/mnist/mnist_{model_name_suffix}_model_300epochs.pth"  # Updated filename to indicate 300 epochs
 torch.save(model.state_dict(), model_filename)
 print(f"Model saved to {model_filename}")
