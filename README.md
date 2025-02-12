@@ -1,6 +1,6 @@
 # The Analog Activation Function (TAAF) of Emergent Linear Systems
 
-[![Paper](https://www.academia.edu/127610553/The_Analog_Activation_Function_TAAF_of_Emergent_Linear_Systems_Evaluating_the_Performance_of_The_Analog_Activation_Function_TAAF_on_MNIST_and_CIFAR_10_Datasets?source=swp_share)]([link-to-your-paper-here](https://www.academia.edu/127610553/The_Analog_Activation_Function_TAAF_of_Emergent_Linear_Systems_Evaluating_the_Performance_of_The_Analog_Activation_Function_TAAF_on_MNIST_and_CIFAR_10_Datasets?source=swp_share)) <!-- Replace with a link to your paper if available (e.g., ArXiv, website) -->
+[![Paper](https://www.academia.edu/127610553/The_Analog_Activation_Function_TAAF_of_Emergent_Linear_Systems_Evaluating_the_Performance_of_The_Analog_Activation_Function_TAAF_on_MNIST_and_CIFAR_10_Datasets)](https://www.academia.edu/127610553/The_Analog_Activation_Function_TAAF_of_Emergent_Linear_Systems_Evaluating_the_Performance_of_The_Analog_Activation_Function_TAAF_on_MNIST_and_CIFAR_10_Datasets) <!-- Replace with a link to your paper if available (e.g., ArXiv, website) -->
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) <!-- Replace with your license badge if applicable -->
 
 ## Overview
