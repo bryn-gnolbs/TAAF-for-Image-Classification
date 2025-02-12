@@ -1,0 +1,19 @@
+[project]
+name = "TAAF-for-Image-Classification"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "bryn-gnolbs", email = "173369134+bryn-gnolbs@users.noreply.github.com"},
+]
+dependencies = ["torch>=2.6.0", "torchvision>=0.21.0", "tqdm>=4.67.1", "datasets>=3.2.0", "transformers>=4.48.3", "numpy>=2.2.2", "matplotlib>=3.10.0"]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
