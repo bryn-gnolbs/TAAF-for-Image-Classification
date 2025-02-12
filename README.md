@@ -6,14 +6,6 @@
 *  Thanks YousefIbrahimismail!
 -->
 
-
-<!-- Logo Section -->
-<div align="center">
-    <a href="https://www.linkedin.com/company/genoinc" target="_blank">
-        <img src="https://media.licdn.com/dms/image/v2/D560BAQE0oQdXeWMOUw/company-logo_200_200/company-logo_200_200/0/1733946421803/genoinc_logo?e=1747267200&v=beta&t=DcVKEUB9Cg4eRyCNVdQtXIIc8xFd97btLE5Ap_0eF8E"
-        alt="GenoLabs Logo" width="290" height="290">
-    </a>
-</div>
 <!-- Project title -->
 <div align="center">
 <img src="https://readme-typing-svg.demolab.com?font=Merriweather&20Bold&size=28&duration=3000&pause=7000&vCenter=true&multiline=true&width=900&lines=Applying+The+Analog+Activation+Function+to+Image+Classification">
