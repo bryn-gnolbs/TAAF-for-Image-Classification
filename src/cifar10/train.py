@@ -130,7 +130,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # --- Choose Activation Type Here ---
 activation_type = (
-    "GELU"  # Options: 'TAAF', 'ELU', 'Combined', 'Tanh', 'ReLU', 'Sigmoid', 'GELU'
+    "TAAF"  # Options: 'TAAF', 'ELU', 'Combined', 'Tanh', 'ReLU', 'Sigmoid', 'GELU'
 )
 elu_alpha = 1.0  # Adjust alpha for ELU
 elu_beta = 1.0  # Adjust beta for ELU
