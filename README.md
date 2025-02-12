@@ -109,10 +109,9 @@ Trained model checkpoints are saved in the `tests/mnist/` and `tests/cifar10/` d
 
 ## Model and Training Details
 
-The CNN architecture and training parameters are detailed in the paper.
+The CNN architecture and training parameters are detailed in the [paper](https://www.academia.edu/127610553/The_Analog_Activation_Function_TAAF_of_Emergent_Linear_Systems_Evaluating_the_Performance_of_The_Analog_Activation_Function_TAAF_on_MNIST_and_CIFAR_10_Datasets?source=swp_share).
 
 **Key Training Parameters:**
-
 *   **Optimizer:** Adam
 *   **Learning Rate:** 0.001
 *   **Loss Function:** Cross-Entropy Loss
@@ -120,40 +119,31 @@ The CNN architecture and training parameters are detailed in the paper.
 *   **Epochs:** 10 for MNIST, 20 for CIFAR-10
 
 ## Results
-
-Detailed results are in the paper.
-
-**Summary of Key Test Accuracies Achieved with TAAF:**
-
+Detailed results are in the [paper](https://www.academia.edu/127610553/The_Analog_Activation_Function_TAAF_of_Emergent_Linear_Systems_Evaluating_the_Performance_of_The_Analog_Activation_Function_TAAF_on_MNIST_and_CIFAR_10_Datasets?source=swp_share).
 *   **MNIST:** ~99.39%
 *   **CIFAR-10:** ~79.37%
 
-## File Structure
-repository-directory/
-├── src/
-│ ├── mnist/
-│ │ └── train.py
-│ ├── cifar10/
-│ │ └── train.py
-├── tests/
-│ ├── mnist/
-│ │ └── mnist_TAAF_model.pth
-│ └── cifar10/
-│   └── cifar10_TAAF_model.pth
-├── LICENSE
-├── README.md
-└── requirements.txt
-
 ## Citation
-Bryn T. Chatfield. (2025). The Analog Activation Function (TAAF) of Emergent Linear Systems: Evaluating the Performance of The Analog Activation Function (TAAF) on MNIST and CIFAR-10 Datasets. OpenASCI & Genova Laboratories Research & Development Div.
+B. T. Chatfield. (2025). The Analog Activation Function (TAAF) of Emergent Linear Systems: Evaluating the Performance of The Analog Activation Function (TAAF) on MNIST and CIFAR-10 Datasets. OpenASCI & Genova Laboratories Research & Development Div.
 
 ## License
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file.
+This project is licensed under the **A customised version of the Hippocratic License v3** - see the [LICENSE](LICENSE) file.
 
 ## Contact
-Bryn T. Chatfield
-[LinkedIn Profile](https://www.linkedin.com/in/bryn-chatfield/)
-OpenASCI & GenoLabs
+[Personal - LinkedIn Profile](https://www.linkedin.com/in/bryn-chatfield/)
+[OpenASCI](https://www.linkedin.com/company/openasci)
+[GenoLabs](https://www.linkedin.com/company/genoinc)
+
+## Acknowledgments
+
+*   Inspired by the Project-README-Template by YousefIbrahimismail.
+*   [Make a Readme](https://www.makeareadme.com/)
+*   [Shields](https://shields.io/)
+*   [SVG README](https://readme-typing-svg.demolab.com/demo/)
+
+<p align="right"><a href="#top">back to top ⬆️</a></p>
+
+> Discussion & Contributions are encouraged! Please feel free to open a [Pull Request](https://github.com/bryn-gnolbs/TAAF-for-Image-Classification/pulls). 
 
 ---
 
@@ -174,20 +164,3 @@ OpenASCI & GenoLabs
     </tr>
 </table>
 </dev>
-
-<p align="right"><a href="#top">back to top ⬆️</a></p>
-
-## Acknowledgments
-
-*   Inspired by the Project-README-Template by YousefIbrahimismail.
-*   [Make a Readme](https://www.makeareadme.com/)
-*   [Shields](https://shields.io/)
-*   [SVG README](https://readme-typing-svg.demolab.com/demo/)
-
-<p align="right"><a href="#top">back to top ⬆️</a></p>
-
-## Feedback
-
-> Contributions are encouraged! Please feel free to open a [Pull Request](https://github.com/bryn-gnolbs/TAAF-for-Image-Classification/pulls).
-
-<p align="right"><a href="#top">back to top ⬆️</a></p>
