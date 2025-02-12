@@ -1,9 +1,8 @@
 # The Analog Activation Function (TAAF) of Emergent Linear Systems
 
-[![Paper](https://cdn.simpleicons.org/academia-blue)](https://www.academia.edu/127610553/The_Analog_Activation_Function_TAAF_of_Emergent_Linear_Systems_Evaluating_the_Performance_of_The_Analog_Activation_Function_TAAF_on_MNIST_and_CIFAR_10_Datasets)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) <!-- Replace with your license badge if applicable -->
-[![Paper with Code](https://img.shields.io/badge/Paper%20with%20Code-PapersWithCode-blue)](https://paperswithcode.com/paper/evaluating-the-performance-of-taaf-for-image)
-<img height="32" width="32" src="https://cdn.simpleicons.org/academia" />
+[![Academia](https://img.shields.io/badge/Academia.edu-%23003865?logo=Academia)](https://www.academia.edu/127610553/The_Analog_Activation_Function_TAAF_of_Emergent_Linear_Systems_Evaluating_the_Performance_of_The_Analog_Activation_Function_TAAF_on_MNIST_and_CIFAR_10_Datasets)
+[![License](https://img.shields.io/badge/Hippocratic_License_V3-blue.svg)](LICENSE) <!-- Replace with your license badge if applicable -->
+[![Paper with Code](https://img.shields.io/badge/Papers_with_code-grey?logo=paperswithcode&logoColor=21CBCE)](https://paperswithcode.com/paper/evaluating-the-performance-of-taaf-for-image)
 
 
 ## Overview
