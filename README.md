@@ -2,6 +2,7 @@
 
 [![Paper](https://img.shields.io/badge/Paper-Academia.edu-blue)](https://www.academia.edu/127610553/The_Analog_Activation_Function_TAAF_of_Emergent_Linear_Systems_Evaluating_the_Performance_of_The_Analog_Activation_Function_TAAF_on_MNIST_and_CIFAR_10_Datasets)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) <!-- Replace with your license badge if applicable -->
+[![Paper with Code](https://img.shields.io/badge/Paper%20with%20Code-PapersWithCode-blue)](https://paperswithcode.com/paper/evaluating-the-performance-of-taaf-for-image)
 
 ## Overview
 
