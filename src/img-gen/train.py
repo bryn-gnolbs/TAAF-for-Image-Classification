@@ -16,16 +16,22 @@ class TAAF(nn.Module):
         return (numerator / denominator) - (1 / 2)  # TAAF formula
 
 
-# --- Define Generator Network ---
-class Generator(nn.Module):
-    def __init__(self, latent_dim, img_channels, features_g=64):
-        super(Generator, self).__init__()
+# --- Define Conditional Generator Network ---
+class ConditionalGenerator(nn.Module):
+    def __init__(
+        self, latent_dim, img_channels, num_classes, embedding_dim, features_g=64
+    ):
+        super(ConditionalGenerator, self).__init__()
         self.latent_dim = latent_dim
         self.img_channels = img_channels
+        self.num_classes = num_classes
+        self.embedding_dim = embedding_dim
+        self.label_embedding = nn.Embedding(num_classes, embedding_dim)
+
         self.net = nn.Sequential(
-            # Input: latent_dim x 1 x 1
+            # Input: (latent_dim + embedding_dim) x 1 x 1
             self._block(
-                latent_dim, features_g * 16, 4, 1, 0
+                latent_dim + embedding_dim, features_g * 16, 4, 1, 0
             ),  # Output: (features_g*16) x 4 x 4
             self._block(
                 features_g * 16, features_g * 8, 4, 2, 1
@@ -55,20 +61,36 @@ class Generator(nn.Module):
             TAAF(),  # Using TAAF activation here
         )
 
-    def forward(self, z):
-        return self.net(z.reshape(-1, self.latent_dim, 1, 1))
+    def forward(self, z, labels):
+        # Convert label to embedding
+        label_embedding = self.label_embedding(labels)
+        # Concatenate latent noise and label embedding
+        combined_input = torch.cat(
+            (z, label_embedding), dim=1
+        )  # Concatenate along channel dimension
+        return self.net(
+            combined_input.reshape(-1, self.latent_dim + self.embedding_dim, 1, 1)
+        )
 
 
-# --- Define Discriminator Network ---
-class Discriminator(nn.Module):
-    def __init__(self, img_channels, features_d=64):
-        super(Discriminator, self).__init__()
+# --- Define Conditional Discriminator Network ---
+class ConditionalDiscriminator(nn.Module):
+    def __init__(self, img_channels, num_classes, embedding_dim, features_d=64):
+        super(ConditionalDiscriminator, self).__init__()
         self.img_channels = img_channels
+        self.num_classes = num_classes
+        self.embedding_dim = embedding_dim
+        self.label_embedding = nn.Embedding(num_classes, embedding_dim)
+
         self.net = nn.Sequential(
             # Input: img_channels x 32 x 32
             nn.Conv2d(
-                img_channels, features_d, kernel_size=4, stride=2, padding=1
-            ),  # Output: features_d x 16 x 16
+                img_channels + embedding_dim,
+                features_d,
+                kernel_size=4,
+                stride=2,
+                padding=1,
+            ),  # Output: features_d x 16 x 16 (input channel is now image channels + embedding dim)
             TAAF(),  # Using TAAF activation here
             self._block(
                 features_d, features_d * 2, 4, 2, 1
@@ -94,8 +116,16 @@ class Discriminator(nn.Module):
             TAAF(),  # Using TAAF activation here
         )
 
-    def forward(self, x):
-        return self.net(x).reshape(-1, 1)
+    def forward(self, x, labels):
+        # Convert label to embedding
+        label_embedding = self.label_embedding(labels)
+        # Replicate label embedding spatially to match image size (for concatenation)
+        label_embedding_resized = (
+            label_embedding.unsqueeze(2).unsqueeze(3).repeat(1, 1, x.size(2), x.size(3))
+        )
+        # Concatenate image and label embedding along channel dimension
+        combined_input = torch.cat((x, label_embedding_resized), dim=1)
+        return self.net(combined_input).reshape(-1, 1)
 
 
 # --- Hyperparameters and Setup ---
@@ -108,6 +138,8 @@ LATENT_DIM = 128  # Size of the noise vector
 NUM_EPOCHS = 100  # You can increase this
 FEATURES_DISC = 64
 FEATURES_GEN = 64
+NUM_CLASSES = 10  # CIFAR-10 has 10 classes
+EMBEDDING_DIM = 100  # Dimension of text embedding
 
 # --- Data Loading ---
 transforms_ = transforms.Compose(
@@ -125,15 +157,21 @@ dataset = datasets.CIFAR10(
 )
 dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
 
-# --- Initialize Generator and Discriminator ---
-generator = Generator(LATENT_DIM, IMG_CHANNELS, FEATURES_GEN).to(device)
-discriminator = Discriminator(IMG_CHANNELS, FEATURES_DISC).to(device)
+# --- Initialize Conditional Generator and Discriminator ---
+generator = ConditionalGenerator(
+    LATENT_DIM, IMG_CHANNELS, NUM_CLASSES, EMBEDDING_DIM, FEATURES_GEN
+).to(device)
+discriminator = ConditionalDiscriminator(
+    IMG_CHANNELS, NUM_CLASSES, EMBEDDING_DIM, FEATURES_DISC
+).to(device)
 
 
 # Initialize weights (DCGAN paper suggests using normal distribution)
 def initialize_weights(model):
     for m in model.modules():
-        if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d, nn.BatchNorm2d)):
+        if isinstance(
+            m, (nn.Conv2d, nn.ConvTranspose2d, nn.BatchNorm2d, nn.Embedding)
+        ):  # Include Embedding layer
             nn.init.normal_(m.weight.data, 0.0, 0.02)  # mean=0, std=0.02
 
 
@@ -152,18 +190,34 @@ optimizer_disc = optim.AdamW(
 # --- Loss Function ---
 criterion = nn.BCELoss()
 
-# --- Fixed noise for image generation during training ---
-fixed_noise = torch.randn(32, LATENT_DIM, device=device)  # Generate 32 sample images
+# --- Fixed noise and labels for image generation during training ---
+fixed_noise = torch.randn(
+    NUM_CLASSES, LATENT_DIM, device=device
+)  # Generate NUM_CLASSES samples
+fixed_labels = torch.arange(0, NUM_CLASSES, device=device)  # Labels 0 to NUM_CLASSES-1
 
 # --- Directories for saving images and models ---
-sample_dir = "./tests/gen-img/images"
-checkpoint_dir = "./tests/gen-img"
+sample_dir = "./tests/conditional-gen-img/images"
+checkpoint_dir = "./tests/conditional-gen-img"
 os.makedirs(sample_dir, exist_ok=True)
 os.makedirs(checkpoint_dir, exist_ok=True)
 
+CIFAR10_CLASS_NAMES = [
+    "airplane",
+    "automobile",
+    "bird",
+    "cat",
+    "deer",
+    "dog",
+    "frog",
+    "horse",
+    "ship",
+    "truck",
+]
+
 
 # --- Training Loop ---
-def train_dcgan(
+def train_conditional_dcgan(
     dataloader,
     generator,
     discriminator,
@@ -172,6 +226,7 @@ def train_dcgan(
     criterion,
     num_epochs,
     fixed_noise,
+    fixed_labels,
     sample_dir,
     checkpoint_dir,
 ):
@@ -179,22 +234,25 @@ def train_dcgan(
     discriminator.train()
 
     for epoch in range(num_epochs):
-        for batch_idx, (real_images, _) in enumerate(
-            tqdm(dataloader)
-        ):  # _ because we don't need labels for GANs
+        for batch_idx, (real_images, labels) in enumerate(tqdm(dataloader)):
             real_images = real_images.to(device)
+            labels = labels.to(device)  # Class labels as conditions
             batch_size = real_images.shape[0]
 
-            # --- Train Discriminator: maximize log(D(x)) + log(1 - D(G(z))) ---
+            # --- Train Discriminator: maximize log(D(x, y)) + log(1 - D(G(z, y), y)) ---
             noise = torch.randn(batch_size, LATENT_DIM, device=device)
-            fake_images = generator(noise)
+            fake_images = generator(noise, labels)  # Generator now takes labels
 
-            disc_real = discriminator(real_images).reshape(-1)
+            disc_real = discriminator(real_images, labels).reshape(
+                -1
+            )  # Discriminator now takes labels
             loss_disc_real = criterion(
                 disc_real, torch.ones_like(disc_real)
             )  # Target for real images is 1
 
-            disc_fake = discriminator(fake_images.detach()).reshape(
+            disc_fake = discriminator(
+                fake_images.detach(), labels
+            ).reshape(  # Discriminator now takes labels
                 -1
             )  # Detach to avoid backprop to generator in disc step
             loss_disc_fake = criterion(
@@ -207,8 +265,10 @@ def train_dcgan(
             loss_disc.backward()
             optimizer_disc.step()
 
-            # --- Train Generator: maximize log(D(G(z))) ---
-            output = discriminator(fake_images).reshape(-1)
+            # --- Train Generator: maximize log(D(G(z, y), y)) ---
+            output = discriminator(fake_images, labels).reshape(
+                -1
+            )  # Discriminator now takes labels
             loss_gen = criterion(
                 output, torch.ones_like(output)
             )  # Target for fake images to be considered real is 1
@@ -225,32 +285,41 @@ def train_dcgan(
                 )
 
                 with torch.no_grad():
-                    fake_samples = generator(fixed_noise)
-                    save_image(
-                        fake_samples[:32],
-                        os.path.join(
-                            sample_dir, f"epoch_{epoch}_batch_{batch_idx}.png"
-                        ),
-                        normalize=True,
-                    )
+                    fake_samples = generator(
+                        fixed_noise, fixed_labels
+                    )  # Generate with fixed noise and labels
+                    # Save images with labels as filenames
+                    for i in range(NUM_CLASSES):
+                        save_image(
+                            fake_samples[i],
+                            os.path.join(
+                                sample_dir,
+                                f"epoch_{epoch}_batch_{batch_idx}_class_{CIFAR10_CLASS_NAMES[i]}.png",
+                            ),
+                            normalize=True,
+                        )
 
         # --- Save model checkpoints ---
         if epoch % 5 == 0:
             torch.save(
                 generator.state_dict(),
-                os.path.join(checkpoint_dir, f"generator_epoch_{epoch}.pth"),
+                os.path.join(
+                    checkpoint_dir, f"conditional_generator_epoch_{epoch}.pth"
+                ),
             )
             torch.save(
                 discriminator.state_dict(),
-                os.path.join(checkpoint_dir, f"discriminator_epoch_{epoch}.pth"),
+                os.path.join(
+                    checkpoint_dir, f"conditional_discriminator_epoch_{epoch}.pth"
+                ),
             )
-            print(f"Saved checkpoints for epoch {epoch}")
+            print(f"Saved conditional checkpoints for epoch {epoch}")
 
-    print("Training finished!")
+    print("Conditional Training finished!")
 
 
-# --- Start Training ---
-train_dcgan(
+# --- Start Conditional Training ---
+train_conditional_dcgan(
     dataloader,
     generator,
     discriminator,
@@ -259,9 +328,10 @@ train_dcgan(
     criterion,
     NUM_EPOCHS,
     fixed_noise,
+    fixed_labels,
     sample_dir,
     checkpoint_dir,
 )
 
-print("Sample images are saved in:", sample_dir)
-print("Model checkpoints are saved in:", checkpoint_dir)
+print("Conditional sample images are saved in:", sample_dir)
+print("Conditional model checkpoints are saved in:", checkpoint_dir)

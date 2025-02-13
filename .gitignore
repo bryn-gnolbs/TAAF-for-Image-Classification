@@ -173,3 +173,4 @@ cython_debug/
 
 # Generated Images
 tests/gen-img/images/
+tests/conditional-gen-img/images/
