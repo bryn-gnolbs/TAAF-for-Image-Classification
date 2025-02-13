@@ -156,8 +156,8 @@ criterion = nn.BCELoss()
 fixed_noise = torch.randn(32, LATENT_DIM, device=device)  # Generate 32 sample images
 
 # --- Directories for saving images and models ---
-sample_dir = "cifar10_samples_taaf"
-checkpoint_dir = "cifar10_checkpoints_taaf"
+sample_dir = "./tests/gen-img/images"
+checkpoint_dir = "./tests/gen-img"
 os.makedirs(sample_dir, exist_ok=True)
 os.makedirs(checkpoint_dir, exist_ok=True)
 
