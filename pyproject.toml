@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "bryn-gnolbs", email = "173369134+bryn-gnolbs@users.noreply.github.com"},
 ]
-dependencies = ["torch>=2.6.0", "torchvision>=0.21.0", "tqdm>=4.67.1", "datasets>=3.2.0", "transformers>=4.48.3", "numpy>=2.2.2", "matplotlib>=3.10.0", "torchinfo>=1.8.0"]
+dependencies = ["torch>=2.6.0", "torchvision>=0.21.0", "tqdm>=4.67.1", "datasets>=3.2.0", "transformers>=4.48.3", "numpy>=2.2.2", "matplotlib>=3.10.0", "torchinfo>=1.8.0", "pytorch-fid>=0.3.0"]
 requires-python = ">=3.12"
 readme = "README.md"
 license = {text = "MIT"}

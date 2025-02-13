@@ -5,7 +5,9 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 import os
+import tempfile  # Import for temporary directories
 from tqdm import tqdm
+from pytorch_fid import fid_score  # Import FID calculation
 
 
 # --- Define TAAF Activation (as provided) ---
@@ -137,9 +139,9 @@ IMG_CHANNELS = 3  # CIFAR-10 color images
 LATENT_DIM = 128  # Size of the noise vector
 NUM_EPOCHS = 100  # You can increase this
 FEATURES_DISC = 64
-FEATURES_GEN = 64
+FEATURES_GEN = 128  # Increased Generator features
 NUM_CLASSES = 10  # CIFAR-10 has 10 classes
-EMBEDDING_DIM = 100  # Dimension of text embedding
+EMBEDDING_DIM = 256  # Increased Embedding Dimension
 
 # --- Data Loading ---
 transforms_ = transforms.Compose(
@@ -156,6 +158,11 @@ dataset = datasets.CIFAR10(
     root="./data", train=True, download=True, transform=transforms_
 )
 dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
+
+# --- Get a fixed batch of real images for FID calculation ---
+real_batch_for_fid = next(iter(dataloader))[0][:32].to(
+    device
+)  # Use first 32 real images for FID, keep on GPU
 
 # --- Initialize Conditional Generator and Discriminator ---
 generator = ConditionalGenerator(
@@ -197,8 +204,8 @@ fixed_noise = torch.randn(
 fixed_labels = torch.arange(0, NUM_CLASSES, device=device)  # Labels 0 to NUM_CLASSES-1
 
 # --- Directories for saving images and models ---
-sample_dir = "./tests/conditional-gen-img/images"
-checkpoint_dir = "./tests/conditional-gen-img"
+sample_dir = "./tests/gen-img/images"
+checkpoint_dir = "./tests/gen-img"
 os.makedirs(sample_dir, exist_ok=True)
 os.makedirs(checkpoint_dir, exist_ok=True)
 
@@ -216,6 +223,14 @@ CIFAR10_CLASS_NAMES = [
 ]
 
 
+# --- Function to preprocess images for FID calculation ---
+def preprocess_image_for_fid(images):
+    # Rescale from [-1, 1] to [0, 255] and convert to uint8
+    return (
+        ((images * 0.5 + 0.5) * 255).clamp(0, 255).to(torch.uint8).cpu()
+    )  # Move to CPU and uint8
+
+
 # --- Training Loop ---
 def train_conditional_dcgan(
     dataloader,
@@ -229,9 +244,13 @@ def train_conditional_dcgan(
     fixed_labels,
     sample_dir,
     checkpoint_dir,
+    real_batch_for_fid,  # Pass fixed real batch
 ):
     generator.train()
     discriminator.train()
+
+    # --- Prepare real images for FID calculation ---
+    real_images_for_fid = preprocess_image_for_fid(real_batch_for_fid)
 
     for epoch in range(num_epochs):
         for batch_idx, (real_images, labels) in enumerate(tqdm(dataloader)):
@@ -277,7 +296,7 @@ def train_conditional_dcgan(
             loss_gen.backward()
             optimizer_gen.step()
 
-            # --- Print progress and save samples ---
+            # --- Print progress, save samples and calculate FID ---
             if batch_idx % 100 == 0:
                 print(
                     f"Epoch [{epoch}/{num_epochs}] Batch {batch_idx}/{len(dataloader)} \
@@ -288,6 +307,37 @@ def train_conditional_dcgan(
                     fake_samples = generator(
                         fixed_noise, fixed_labels
                     )  # Generate with fixed noise and labels
+                    fake_images_fid = preprocess_image_for_fid(fake_samples)
+
+                    # --- Create temporary directories ---
+                    with (
+                        tempfile.TemporaryDirectory() as real_temp_dir,
+                        tempfile.TemporaryDirectory() as fake_temp_dir,
+                    ):
+                        # --- Save real images to temporary directory ---
+                        for i in range(real_images_for_fid.size(0)):
+                            save_image(
+                                real_images_for_fid[i].float() / 255.0,
+                                os.path.join(real_temp_dir, f"real_{i}.png"),
+                            )  # Need to rescale back to [0, 1] for save_image
+
+                        # --- Save fake images to temporary directory ---
+                        for i in range(fake_images_fid.size(0)):
+                            save_image(
+                                fake_images_fid[i].float() / 255.0,
+                                os.path.join(fake_temp_dir, f"fake_{i}.png"),
+                            )  # Need to rescale back to [0, 1] for save_image
+
+                        # --- Calculate FID using directory paths ---
+                        fid_value = fid_score.calculate_fid_given_paths(
+                            [real_temp_dir, fake_temp_dir],
+                            batch_size=32,
+                            device=device,
+                            dims=2048,  # Added dims argument
+                            num_workers=0,  # Setting num_workers to 0 to avoid multiprocessing issues for now
+                        )
+                        print(f"FID: {fid_value:.4f}")
+
                     # Save images with labels as filenames
                     for i in range(NUM_CLASSES):
                         save_image(
@@ -318,7 +368,7 @@ def train_conditional_dcgan(
     print("Conditional Training finished!")
 
 
-# --- Start Conditional Training ---
+# --- Start Conditional Training with FID ---
 train_conditional_dcgan(
     dataloader,
     generator,
@@ -331,7 +381,9 @@ train_conditional_dcgan(
     fixed_labels,
     sample_dir,
     checkpoint_dir,
+    real_batch_for_fid,  # Pass fixed real batch
 )
 
 print("Conditional sample images are saved in:", sample_dir)
 print("Conditional model checkpoints are saved in:", checkpoint_dir)
+print("Make sure to install pytorch-fid: pip install pytorch-fid")
