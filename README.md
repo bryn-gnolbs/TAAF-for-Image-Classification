@@ -16,7 +16,9 @@
     <a href="https://paperswithcode.com/paper/evaluating-the-performance-of-taaf-for-image"><img alt="Papers With Code" src="https://img.shields.io/badge/Papers_with_code-grey?logo=paperswithcode&logoColor=21CBCE"></a>
     <a href="https://www.academia.edu/127610553/The_Analog_Activation_Function_TAAF_of_Emergent_Linear_Systems_Evaluating_the_Performance_of_The_Analog_Activation_Function_TAAF_on_MNIST_and_CIFAR_10_Datasets"><img alt="Papers With Code" src="https://img.shields.io/badge/Academia.edu-%23003865?logo=Academia"></a>
     <a href="https://paperswithcode.com/sota/image-classification-on-mnist?p=evaluating-the-performance-of-taaf-for-image"><img alt="License" src="https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/evaluating-the-performance-of-taaf-for-image/image-classification-on-mnist"></a>
+    <a href="https://paperswithcode.com/sota/image-classification-on-cifar-10?p=evaluating-the-performance-of-taaf-for-image"><img alt="License" src="https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/evaluating-the-performance-of-taaf-for-image/image-classification-on-cifar-10"></a>
 </div>
+
 
 ## About
 <!-- information about the project -->
