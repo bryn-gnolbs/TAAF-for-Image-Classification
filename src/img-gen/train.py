@@ -187,10 +187,10 @@ discriminator.apply(initialize_weights)
 
 
 # --- Optimizers ---
-optimizer_gen = optim.AdamW(
+optimizer_gen = optim.Adam(
     generator.parameters(), lr=LEARNING_RATE, betas=(0.5, 0.999)
 )  # betas are standard for DCGAN
-optimizer_disc = optim.AdamW(
+optimizer_disc = optim.Adam(
     discriminator.parameters(), lr=LEARNING_RATE, betas=(0.5, 0.999)
 )
 
