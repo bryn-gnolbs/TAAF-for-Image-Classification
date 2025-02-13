@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from tqdm import tqdm
 import torch.nn.functional as F  # Import for functional tanh
+from torch.optim.lr_scheduler import ExponentialLR  # Import for LR Decay
 
 
 # Define The Analog Activation Function (TAAF)
@@ -130,11 +131,11 @@ test_dataset = datasets.CIFAR10(
 )
 
 train_loader = DataLoader(
-    train_dataset, batch_size=64, shuffle=True, num_workers=2
-)  # Added num_workers for CIFAR-10
+    train_dataset, batch_size=120, shuffle=True, num_workers=2
+)  # Updated batch_size to 120
 test_loader = DataLoader(
-    test_dataset, batch_size=64, shuffle=False, num_workers=2
-)  # Added num_workers for CIFAR-10
+    test_dataset, batch_size=120, shuffle=False, num_workers=2
+)  # Updated batch_size to 120
 
 # Initialize model, loss function, and optimizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -151,7 +152,10 @@ model = CIFAR10Model(
     activation_type=activation_type, elu_alpha=elu_alpha, elu_beta=elu_beta
 ).to(device)
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.AdamW(model.parameters(), lr=0.001)  # Updated Optimizer to AdamW
+
+# Learning Rate Scheduler - Exponential Decay
+lr_scheduler = ExponentialLR(optimizer, gamma=0.98)  # Decay rate of 0.98 per epoch
 
 
 # Training loop (same as before)
@@ -174,8 +178,13 @@ def train(model, train_loader, criterion, optimizer, device):
         correct += predicted.eq(labels).sum().item()
 
     train_loss = running_loss / len(train_loader)
-    train_acc = 100.0 * correct / total
-    return train_loss, train_acc
+    top1_train_accuracy = 100.0 * correct / total  # Renamed to top1_train_accuracy
+    percentage_train_error = 100.0 - top1_train_accuracy  # Calculate Percentage error
+    return (
+        train_loss,
+        top1_train_accuracy,
+        percentage_train_error,
+    )  # Return percentage_train_error
 
 
 # Testing loop (same as before)
@@ -196,12 +205,13 @@ def test(model, test_loader, criterion, device):
             correct += predicted.eq(labels).sum().item()
 
     test_loss = running_loss / len(test_loader)
-    test_acc = 100.0 * correct / total
-    return test_loss, test_acc
+    top1_accuracy = 100.0 * correct / total  # Renamed to top1_accuracy
+    percentage_error = 100.0 - top1_accuracy  # Calculate Percentage error
+    return test_loss, top1_accuracy, percentage_error  # Return percentage_error
 
 
 # Train and evaluate the model (same as before with model name change)
-num_epochs = 20  # Increased epochs for CIFAR-10
+num_epochs = 300  # Increased epochs for CIFAR-10
 model_name_suffix = activation_type
 model_dir = "./tests/cifar10/"
 if activation_type == "ELU":
@@ -209,12 +219,22 @@ if activation_type == "ELU":
 
 for epoch in range(num_epochs):
     print(f"Epoch {epoch + 1}/{num_epochs} - Activation: {activation_type}")
-    train_loss, train_acc = train(model, train_loader, criterion, optimizer, device)
-    test_loss, test_acc = test(model, test_loader, criterion, device)
-    print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}%")
-    print(f"Test Loss: {test_loss:.4f}, Test Acc: {test_acc:.2f}%")
+    train_loss, top1_train_accuracy, percentage_train_error = train(
+        model, train_loader, criterion, optimizer, device
+    )  # Get percentage_train_error
+    test_loss, top1_accuracy, percentage_error = test(
+        model, test_loader, criterion, device
+    )  # Get percentage_error
+    print(
+        f"Train Loss: {train_loss:.4f}, Train Top-1 Accuracy: {top1_train_accuracy:.2f}%, Train Percentage Error: {percentage_train_error:.2f}%"
+    )  # Updated print statement
+    print(
+        f"Test Loss: {test_loss:.4f}, Test Top-1 Accuracy: {top1_accuracy:.2f}%, Test Percentage Error: {percentage_error:.2f}%"
+    )  # Updated print statement
+
+    lr_scheduler.step()  # Step the learning rate scheduler every epoch
 
 # Save the model checkpoint (filename now includes activation type)
-model_filename = f"{model_dir}cifar10_{model_name_suffix}_model.pth"  # Updated filename
+model_filename = f"{model_dir}cifar10_{model_name_suffix}_model_300epochs_AdamW.pth"  # Updated filename
 torch.save(model.state_dict(), model_filename)
 print(f"Model saved to {model_filename}")
