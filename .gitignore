@@ -170,3 +170,7 @@ cython_debug/
 # Random files
 /terminal.dump
 /terminal2.dump
+
+# Generated Images
+tests/gen-img/images/
+tests/conditional-gen-img/images/
