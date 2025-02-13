@@ -133,7 +133,7 @@ class ConditionalDiscriminator(nn.Module):
 # --- Hyperparameters and Setup ---
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 LEARNING_RATE = 2e-4  # Consistent with DCGAN papers
-BATCH_SIZE = 128
+BATCH_SIZE = 32
 IMAGE_SIZE = 32  # CIFAR-10 images are 32x32
 IMG_CHANNELS = 3  # CIFAR-10 color images
 LATENT_DIM = 128  # Size of the noise vector
@@ -157,7 +157,9 @@ transforms_ = transforms.Compose(
 dataset = datasets.CIFAR10(
     root="./data", train=True, download=True, transform=transforms_
 )
-dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
+dataloader = DataLoader(
+    dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4
+)  # Increased num_workers to 4
 
 # --- Get a fixed batch of real images for FID calculation ---
 real_batch_for_fid = next(iter(dataloader))[0][:32].to(
@@ -296,7 +298,7 @@ def train_conditional_dcgan(
             loss_gen.backward()
             optimizer_gen.step()
 
-            # --- Print progress, save samples and calculate FID ---
+            # --- Print progress and save samples ---
             if batch_idx % 100 == 0:
                 print(
                     f"Epoch [{epoch}/{num_epochs}] Batch {batch_idx}/{len(dataloader)} \
@@ -307,47 +309,49 @@ def train_conditional_dcgan(
                     fake_samples = generator(
                         fixed_noise, fixed_labels
                     )  # Generate with fixed noise and labels
-                    fake_images_fid = preprocess_image_for_fid(fake_samples)
+                    save_image(
+                        fake_samples[:32],
+                        os.path.join(
+                            sample_dir, f"epoch_{epoch}_batch_{batch_idx}.png"
+                        ),
+                        normalize=True,
+                    )
 
-                    # --- Create temporary directories ---
-                    with (
-                        tempfile.TemporaryDirectory() as real_temp_dir,
-                        tempfile.TemporaryDirectory() as fake_temp_dir,
-                    ):
-                        # --- Save real images to temporary directory ---
-                        for i in range(real_images_for_fid.size(0)):
-                            save_image(
-                                real_images_for_fid[i].float() / 255.0,
-                                os.path.join(real_temp_dir, f"real_{i}.png"),
-                            )  # Need to rescale back to [0, 1] for save_image
+        # --- Calculate FID at the end of each epoch ---
+        with torch.no_grad():
+            fake_samples = generator(
+                fixed_noise, fixed_labels
+            )  # Generate with fixed noise and labels
+            fake_images_fid = preprocess_image_for_fid(fake_samples)
 
-                        # --- Save fake images to temporary directory ---
-                        for i in range(fake_images_fid.size(0)):
-                            save_image(
-                                fake_images_fid[i].float() / 255.0,
-                                os.path.join(fake_temp_dir, f"fake_{i}.png"),
-                            )  # Need to rescale back to [0, 1] for save_image
+            # --- Create temporary directories ---
+            with (
+                tempfile.TemporaryDirectory() as real_temp_dir,
+                tempfile.TemporaryDirectory() as fake_temp_dir,
+            ):
+                # --- Save real images to temporary directory ---
+                for i in range(real_images_for_fid.size(0)):
+                    save_image(
+                        real_images_for_fid[i].float() / 255.0,
+                        os.path.join(real_temp_dir, f"real_{i}.png"),
+                    )  # Need to rescale back to [0, 1] for save_image
 
-                        # --- Calculate FID using directory paths ---
-                        fid_value = fid_score.calculate_fid_given_paths(
-                            [real_temp_dir, fake_temp_dir],
-                            batch_size=32,
-                            device=device,
-                            dims=2048,  # Added dims argument
-                            num_workers=0,  # Setting num_workers to 0 to avoid multiprocessing issues for now
-                        )
-                        print(f"FID: {fid_value:.4f}")
+                # --- Save fake images to temporary directory ---
+                for i in range(fake_images_fid.size(0)):
+                    save_image(
+                        fake_images_fid[i].float() / 255.0,
+                        os.path.join(fake_temp_dir, f"fake_{i}.png"),
+                    )  # Need to rescale back to [0, 1] for save_image
 
-                    # Save images with labels as filenames
-                    for i in range(NUM_CLASSES):
-                        save_image(
-                            fake_samples[i],
-                            os.path.join(
-                                sample_dir,
-                                f"epoch_{epoch}_batch_{batch_idx}_class_{CIFAR10_CLASS_NAMES[i]}.png",
-                            ),
-                            normalize=True,
-                        )
+                # --- Calculate FID using directory paths ---
+                fid_value = fid_score.calculate_fid_given_paths(
+                    [real_temp_dir, fake_temp_dir],
+                    batch_size=32,
+                    device=device,
+                    dims=2048,  # Added dims argument
+                    num_workers=0,  # Setting num_workers to 0 to avoid multiprocessing issues for now
+                )
+                print(f"Epoch {epoch} FID: {fid_value:.4f}")
 
         # --- Save model checkpoints ---
         if epoch % 5 == 0:
