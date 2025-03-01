@@ -132,8 +132,9 @@ class ConditionalDiscriminator(nn.Module):
 
 # --- Hyperparameters and Setup ---
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-LEARNING_RATE = 2e-4  # Consistent with DCGAN papers
-BATCH_SIZE = 32
+LEARNING_RATE_GEN = 2e-4  # Learning rate for the Generator
+LEARNING_RATE_DISC = 1e-4  # Lower learning rate for the Discriminator
+BATCH_SIZE = 128
 IMAGE_SIZE = 32  # CIFAR-10 images are 32x32
 IMG_CHANNELS = 3  # CIFAR-10 color images
 LATENT_DIM = 128  # Size of the noise vector
@@ -190,11 +191,11 @@ discriminator.apply(initialize_weights)
 
 # --- Optimizers ---
 optimizer_gen = optim.Adam(
-    generator.parameters(), lr=LEARNING_RATE, betas=(0.5, 0.999)
-)  # betas are standard for DCGAN
+    generator.parameters(), lr=LEARNING_RATE_GEN, betas=(0.5, 0.999)
+)  # Adam for Generator with LEARNING_RATE_GEN
 optimizer_disc = optim.Adam(
-    discriminator.parameters(), lr=LEARNING_RATE, betas=(0.5, 0.999)
-)
+    discriminator.parameters(), lr=LEARNING_RATE_DISC, betas=(0.5, 0.999)
+)  # Adam for Discriminator with LEARNING_RATE_DISC
 
 # --- Loss Function ---
 criterion = nn.BCELoss()
